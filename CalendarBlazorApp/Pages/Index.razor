@@ -1,9 +1,64 @@
 ﻿@page "/"
+@using CalendarBlazorApp.Data
 
 <PageTitle>Index</PageTitle>
+<div>
+    <div>
+        <h1>Blazor Caledar Example</h1>
+    </div>
+    <div>
+        <div style="margin-bottom: 10px">
+            <select @onchange="LoadCalendar">
+                @foreach (string month in monthNames)
+                {
+                    <option>@month</option>
+                }
+            </select>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @for (var dayIndex = 0; dayIndex < days.Count(); dayIndex++)
+                    {
+                        <th>
+                            @days[dayIndex]
+                        </th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+@code{
+    List<string> monthNames = new List<string>();
+    List<string> days = new List<string>();
+    List<WeekClass> weeks = new List<WeekClass>();
+    DateTime startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    DateTime endDate = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)).AddMonths(1).AddDays(-1);
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    protected override void OnInitialized()
+    {
+        monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthGenitiveNames.ToList();
+        GenerateCalendarHeader();
+    }
+
+    private void LoadCalendar(ChangeEventArgs e)
+    {
+        var month = e.Value.ToString();
+        var monthIndex = DateTime.ParseExact(month, "MMMM", System.Globalization.CultureInfo.CreateSpecificCulture("en-GB")).Month;
+        startDate = new DateTime(DateTime.Now.Year, monthIndex, 1);
+        endDate = (new DateTime(DateTime.Now.Year, monthIndex, 1)).AddMonths(1).AddDays(-1);
+    }
+
+    private void GenerateCalendarHeader()
+    {
+        var day1 = new List<string>();
+        for (var dt = startDate; dt <= endDate;dt = dt.AddDays(1))
+        {
+            day1.Add(dt.ToString("dddd"));
+        }
+        days = day1.Distinct().ToList();
+    }
+}
